@@ -1,0 +1,6 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+italian_coach.db
+.DS_Store
