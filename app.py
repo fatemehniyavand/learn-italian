@@ -39,6 +39,109 @@ div.stButton>button:hover{background:#0b4bd4!important;color:#fff!important}
 [data-testid="stMetric"]{background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px}
 [data-testid="stDataFrame"]{background:#fff;border-radius:14px}
 .stTabs [data-baseweb="tab"]{font-weight:750;color:#26374a}
+
+/* ===== FORCE ALL INPUTS TO BE CLEAR AND READABLE ===== */
+
+/* Textarea - Grammar answers, Writing, etc. */
+[data-testid="stTextArea"] textarea {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    opacity: 1 !important;
+    caret-color: #000000 !important;
+    border: 2px solid #94a3b8 !important;
+    border-radius: 10px !important;
+    font-size: 17px !important;
+    font-weight: 500 !important;
+}
+
+/* Text input */
+[data-testid="stTextInput"] input {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    opacity: 1 !important;
+    caret-color: #000000 !important;
+    border: 2px solid #94a3b8 !important;
+    font-size: 17px !important;
+}
+
+/* Placeholder */
+[data-testid="stTextArea"] textarea::placeholder,
+[data-testid="stTextInput"] input::placeholder {
+    color: #64748b !important;
+    -webkit-text-fill-color: #64748b !important;
+    opacity: 1 !important;
+}
+
+/* Text when input is focused */
+[data-testid="stTextArea"] textarea:focus,
+[data-testid="stTextInput"] input:focus {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    border-color: #155eef !important;
+    box-shadow: 0 0 0 1px #155eef !important;
+    opacity: 1 !important;
+}
+
+/* Selectbox */
+[data-testid="stSelectbox"] > div > div {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+[data-testid="stSelectbox"] input {
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+}
+
+/* Number inputs */
+[data-testid="stNumberInput"] input {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    opacity: 1 !important;
+}
+
+/* Date inputs */
+[data-testid="stDateInput"] input {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    opacity: 1 !important;
+}
+
+/* BaseWeb inputs used internally by Streamlit */
+div[data-baseweb="input"],
+div[data-baseweb="textarea"] {
+    background-color: #ffffff !important;
+}
+
+div[data-baseweb="input"] input,
+div[data-baseweb="textarea"] textarea {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
+    opacity: 1 !important;
+}
+
+/* Keep disabled fields readable too */
+input:disabled,
+textarea:disabled {
+    background-color: #f8fafc !important;
+    color: #111827 !important;
+    -webkit-text-fill-color: #111827 !important;
+    opacity: 1 !important;
+}
+
+/* Labels must remain dark and readable in main page */
+[data-testid="stMain"] label,
+[data-testid="stMain"] [data-testid="stWidgetLabel"] {
+    color: #111827 !important;
+    opacity: 1 !important;
+}
+
 </style>""", unsafe_allow_html=True)
 
 MENU=[
