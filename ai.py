@@ -7,8 +7,43 @@ SYSTEM="""You are a demanding but supportive professional Italian teacher for a 
 Use contemporary standard Italian. Persian explanations must be precise and readable. Correct strictly: do not give
 credit for materially wrong grammar. Content must be high-frequency, practical and progressively harder."""
 def ask(p,system=SYSTEM): return client().responses.create(model=model(),instructions=system,input=p).output_text
-def jask(p):
-    t=ask(p+"\nReturn ONLY valid JSON, no markdown."); t=re.sub(r"^```json\s*|\s*```$","",t.strip()); return json.loads(t)
+def jask(p, retries=2):
+    last_error = None
+
+    for attempt in range(retries + 1):
+        try:
+            extra = """
+Return ONLY one valid JSON object.
+Do not use Markdown or code fences.
+Do not write anything before or after the JSON.
+Use double quotes for all keys and string values.
+Escape quotation marks inside strings correctly.
+The response must be valid for Python json.loads().
+"""
+            t = ask(p + extra)
+            t = t.strip()
+
+            t = re.sub(r"^```(?:json)?\\s*", "", t)
+            t = re.sub(r"\\s*```$", "", t)
+
+            start = t.find("{")
+            end = t.rfind("}")
+
+            if start == -1 or end == -1 or end <= start:
+                raise ValueError("No complete JSON object returned by AI.")
+
+            clean = t[start:end + 1]
+            return json.loads(clean)
+
+        except (json.JSONDecodeError, ValueError) as e:
+            last_error = e
+
+            if attempt < retries:
+                continue
+
+    raise RuntimeError(
+        f"AI returned invalid JSON after {retries + 1} attempts: {last_error}"
+    )
 def vocab_batch(batch,avoid):
     return jask(f"""Daily vocabulary batch {batch}/5. Create exactly 10 HIGH-FREQUENCY Italian lexical WORDS for A2.
 italian MUST be one word, not an expression. Mix useful verbs/nouns/adjectives/adverbs/connectors.
