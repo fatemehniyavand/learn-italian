@@ -4,3 +4,5 @@ python-dotenv>=1.0
 requests>=2.32
 feedparser>=6.0
 pandas>=2.0
+
+reportlab>=4.0

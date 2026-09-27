@@ -4,3 +4,7 @@ __pycache__/
 *.pyc
 italian_coach.db
 .DS_Store
+
+backup_before_persistence/
+Italian_Coach_No_Repeats_Persistence_PDF_Patch/
+*.db

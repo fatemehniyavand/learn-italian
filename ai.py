@@ -93,3 +93,31 @@ def speech_bytes(text):
     finally:
         try:os.remove(p)
         except:pass
+
+
+# ADD these functions to ai.py and use them instead of one-shot generation.
+
+def vocab_batch_unique(batch, forbidden):
+    forbidden = forbidden[-1500:]
+    return jask(f"""Create exactly 10 HIGH-FREQUENCY A2 Italian WORDS.
+Each italian field MUST contain exactly one lexical word, never a phrase.
+ABSOLUTELY FORBIDDEN because already learned:
+{json.dumps(forbidden,ensure_ascii=False)}
+Do not return morphological/case variants merely to bypass duplication.
+JSON: {{"items":[{{"italian":"","article":"","pos":"","persian":"","example":""}}]}}""")["items"]
+
+def idioms_unique(forbidden):
+    forbidden=forbidden[-1000:]
+    return jask(f"""Create exactly 10 practical everyday Italian expressions for A2-B1.
+Never repeat or trivially rephrase anything in this learned list:
+{json.dumps(forbidden,ensure_ascii=False)}
+JSON: {{"items":[{{"expression":"","persian":"","use_fa":"","example":""}}]}}""")["items"]
+
+def reading_unique(day_no, old_titles):
+    return jask(f"""Create one ORIGINAL Italian learning text for course day {day_no}.
+Difficulty must rise gradually from A2 toward B1. Use useful real-life themes.
+Do NOT repeat these previous titles/topics:
+{json.dumps(old_titles[-300:],ensure_ascii=False)}
+Do not invent breaking-news facts. 180-280 words.
+JSON: {{"title":"","level":"","text":"","words":[{{"it":"","fa":""}}],
+"questions":[{{"q":""}}],"summary_fa":""}}""")

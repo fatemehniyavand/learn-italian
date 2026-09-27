@@ -85,3 +85,87 @@ def save_journal(topic,original,corrected,feedback,score=0):
 def save_speaking(topic,user_text,tutor_text):
     with conn() as c:c.execute("INSERT INTO speaking_sessions(day,topic,user_text,tutor_text) VALUES(?,?,?,?)",
     (date.today().isoformat(),topic,user_text,tutor_text))
+
+
+# ADD/REPLACE these persistence helpers in db.py
+import hashlib
+
+def normalize_text(s):
+    return " ".join((s or "").strip().lower().split())
+
+def init_history_tables():
+    with conn() as c:
+        c.execute("""CREATE TABLE IF NOT EXISTS learned_items(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            day TEXT NOT NULL,
+            kind TEXT NOT NULL,
+            norm TEXT NOT NULL,
+            display TEXT NOT NULL,
+            payload TEXT NOT NULL,
+            UNIQUE(kind,norm)
+        )""")
+        c.execute("""CREATE INDEX IF NOT EXISTS idx_learned_kind_day
+                     ON learned_items(kind,day)""")
+        c.execute("""CREATE TABLE IF NOT EXISTS reading_history(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            day TEXT UNIQUE NOT NULL,
+            title TEXT NOT NULL,
+            norm_title TEXT NOT NULL,
+            fingerprint TEXT UNIQUE NOT NULL,
+            payload TEXT NOT NULL
+        )""")
+
+def learned_values(kind):
+    with conn() as c:
+        return [r["norm"] for r in c.execute(
+            "SELECT norm FROM learned_items WHERE kind=? ORDER BY id",(kind,)
+        ).fetchall()]
+
+def save_unique_items(day, kind, items, key):
+    accepted=[]
+    with conn() as c:
+        for item in items:
+            display=(item.get(key) or "").strip()
+            norm=normalize_text(display)
+            if not norm:
+                continue
+            try:
+                c.execute("""INSERT INTO learned_items(day,kind,norm,display,payload)
+                             VALUES(?,?,?,?,?)""",
+                          (day,kind,norm,display,json.dumps(item,ensure_ascii=False)))
+                accepted.append(item)
+            except sqlite3.IntegrityError:
+                pass
+    return accepted
+
+def items_for_day(day,kind):
+    with conn() as c:
+        rows=c.execute("""SELECT payload FROM learned_items
+                          WHERE day=? AND kind=? ORDER BY id""",(day,kind)).fetchall()
+    return [json.loads(r["payload"]) for r in rows]
+
+def reading_fingerprint(text):
+    return hashlib.sha256(normalize_text(text).encode("utf-8")).hexdigest()
+
+def save_reading_unique(day,obj):
+    fp=reading_fingerprint(obj.get("text",""))
+    title=(obj.get("title") or "").strip()
+    try:
+        with conn() as c:
+            c.execute("""INSERT INTO reading_history(day,title,norm_title,fingerprint,payload)
+                         VALUES(?,?,?,?,?)""",
+                      (day,title,normalize_text(title),fp,json.dumps(obj,ensure_ascii=False)))
+        return True
+    except sqlite3.IntegrityError:
+        return False
+
+def reading_titles():
+    with conn() as c:
+        return [r["title"] for r in c.execute(
+            "SELECT title FROM reading_history ORDER BY id"
+        ).fetchall()]
+
+def reading_for_day(day):
+    with conn() as c:
+        r=c.execute("SELECT payload FROM reading_history WHERE day=?",(day,)).fetchone()
+    return json.loads(r["payload"]) if r else None
